@@ -7,9 +7,8 @@ AOSP_LUNCH=aosp_flounder-userdebug
 if [ -d $KERNEL_DIR ] && [ -d $AOSP_DIR ]; then
 	echo "Building kernel..."
 	set -x
-	cd $KERNEL_DIR
 	rm $KERNEL_IMAGE
-	time ./build.sh 2>&1 | tee build.log
+	time ./build_kernel.sh
 	if [ ! -f $KERNEL_IMAGE ]; then
 		echo "Failed to build kernel image"
 		exit 1
