@@ -1,12 +1,16 @@
 #!/bin/bash
-KERNEL_DIR=/media/cdarkz/EXT_HD/android/kernel-lollipop/tegra_kernel-lollipop
+KERNEL_DIR=/mnt/SATA_HDD/android/kernel-marshmallow/tegra_kernel-marshmallow
 KERNEL_IMAGE=$KERNEL_DIR/arch/arm64/boot/Image.gz-dtb
-AOSP_DIR=/media/cdarkz/EXT_HD/android/aosp_lollipop
+AOSP_DIR=/mnt/SATA_HDD/android/aosp_marshmallow
 AOSP_LUNCH=aosp_flounder-userdebug
+
+echo "KERNEL_DIR=${KERNEL_DIR}"
+echo "KERNEL_IMAGE=${KERNEL_IMAGE}"
+echo "AOSP_DIR=${AOSP_DIR}"
+echo "AOSP_LUNCH=${AOSP_LUNCH}"
 
 if [ -d $KERNEL_DIR ] && [ -d $AOSP_DIR ]; then
 	echo "Building kernel..."
-	set -x
 	rm $KERNEL_IMAGE
 	time ./build_kernel.sh
 	if [ ! -f $KERNEL_IMAGE ]; then
@@ -16,7 +20,6 @@ if [ -d $KERNEL_DIR ] && [ -d $AOSP_DIR ]; then
 
 	echo "Building AOSP"
 	cd $AOSP_DIR
-	set +x
 	source build/envsetup.sh
 	lunch $AOSP_LUNCH
 	echo make bootimage TARGET_PREBUILT_KERNEL=$KERNEL_IMAGE
