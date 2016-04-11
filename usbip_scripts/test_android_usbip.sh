@@ -1,10 +1,16 @@
 #!/bin/bash
 AOSP_DIR=/media/cdarkz/EXT_HD/android/aosp_lollipop
 AOSP_TARGET=flounder
-AOSP_BOOT_FILE=$AOSP_DIR/out/target/product/$AOSP_TARGET/boot.img
+AOSP_BOOT_FILE=/home/cdarkz/work_space/android/aosp_output/boot_triple_3run_usbip.img
+TWRP_FILE=/home/cdarkz/work_space/android/root_recovery/twrp-2.8.7.0-${AOSP_TARGET}.img
+USBIP_DIR=/home/cdarkz/work_space/usbip/output/triple_for_nexus9
 
-if [ -f $1 ]; then
+if [[ -n $1 ]]; then
 	AOSP_BOOT_FILE=$1
+fi
+
+if [[ -n $2 ]]; then
+	USBIP_DIR=$2
 fi
 
 check_state() {                                                                           
@@ -19,9 +25,9 @@ check_state() {
 	return 0
 }
 
-if [ -d $AOSP_DIR ]; then
+if [ -f $AOSP_BOOT_FILE ]; then
 	echo "******************************"
-	echo "* 1. Check USB debug mode *"
+	echo "* 1. Check USB debug mode"
 	check_state
 	if [ $? == 1 ]; then
 		echo "The device is on USB debug mode"
@@ -32,19 +38,35 @@ if [ -d $AOSP_DIR ]; then
 	fi
 
 	echo "******************************"
-	echo "* 2. Load last boot.img *"
+	echo "* 2. Boot to TWRP (${TWRP_FILE})"
 	adb reboot bootloader
-	echo fastboot flash boot $AOSP_DIR/out/target/product/$AOSP_TARGET/boot.img
+	fastboot boot $TWRP_FILE
+
+	echo "******************************"
+	echo "* 3. Install USBIP cli *"
+	sleep 15
+	adb shell mount /system
+	adb push $USBIP_DIR/usbip /system/xbin/usbip
+	adb push $USBIP_DIR/libusbip.so.0.0.1 /system/usr/lib/libusbip.so.0.0.1
+	adb push $USBIP_DIR/libusbip.so.0.0.1 /system/usr/lib/libusbip.so.0
+	adb push $USBIP_DIR/libusbip.so.0.0.1 /system/usr/lib/libusbip.so
+	adb shell chown :shell /system/usr/lib/libusbip*
+	adb shell chmod 0755 /system/usr/lib/libusbip*
+	adb reboot bootloader
+
+	echo "******************************"
+	echo "* 4. Load ${AOSP_BOOT_FILE}"
 	fastboot flash boot $AOSP_BOOT_FILE
 	fastboot reboot
 	adb wait-for-device
+
 	echo "******************************"
-	echo "* 3. Change to root mode *"
+	echo "* 5. Change to root mode"
 	adb root
 	adb wait-for-device
 	echo "******************************"
-	echo "* 4. Print out kernel message *"
+	echo "* 6. Print out kernel message"
 	adb shell cat /proc/kmsg
 else
-	echo "$AOSP_DIR don't exist!!"
+	echo "$AOSP_BOOT_FILE don't exist!!"
 fi
