@@ -15,16 +15,16 @@ AOSP_DIR=/mnt/SATA_HDD/android/aosp_marshmallow
 AOSP_BOOT_FILE=${AOSP_DIR}/out/target/product/${DEVICE_NAME}/boot.img
 case $DEVICE_NAME in
     "bullhead")
-	ROOT_FOLDER=/home/cdarkz/work_space/android/root_recovery/CF-Auto-Root-bullhead-bullhead-nexus5x
+	ROOT_IMAGE=/home/cdarkz/work_space/android/root_recovery/CF-Auto-Root-bullhead-bullhead-nexus5x/image/CF-Auto-Root-bullhead-bullhead-nexus5x.img
 	;;
     "angler")
-	ROOT_FOLDER=/home/cdarkz/work_space/android/root_recovery/CF-Auto-Root-angler-angler-nexus6p
+	ROOT_IMAGE=/home/cdarkz/work_space/android/root_recovery/CF-Auto-Root-angler-angler-nexus6p/image/CF-Auto-Root-angler-angler-nexus6p.img
 	;;
     "flounder")
-	ROOT_FOLDER=/home/cdarkz/work_space/android/root_recovery/CF-Auto-Root-flounder-volantis-nexus9
+	ROOT_IMAGE=/home/cdarkz/work_space/android/root_recovery/CF-Auto-Root-flounder-volantis-nexus9/image/CF-Auto-Root-flounder-volantis-nexus9.img
 	;;
     "hammerhead")
-	ROOT_FOLDER=/home/cdarkz/work_space/android/root_recovery/CF-Auto-Root-hammerhead-hammerhead-nexus5
+	ROOT_IMAGE=/home/cdarkz/work_space/android/root_recovery/CF-Auto-Root-hammerhead-hammerhead-nexus5/image/CF-Auto-Root-hammerhead-hammerhead-nexus5.img
 	;;
     *)
 	echo "Error DEVICE_NAME!!"
@@ -57,23 +57,35 @@ if [ -d ${AOSP_DIR} ]; then
 	fi
 
 	echo "******************************"
-	echo "* 2. Load last boot.img *"
-	adb reboot bootloader
-	echo fastboot flash boot ${AOSP_BOOT_FILE}
-	fastboot flash boot ${AOSP_BOOT_FILE}
-	fastboot reboot
-	adb wait-for-device
+	echo "* 2. Load boot.img *"
+	if [ -e ${AOSP_BOOT_FILE} ]; then
+		adb reboot bootloader
+		echo fastboot flash boot ${AOSP_BOOT_FILE}
+		fastboot flash boot ${AOSP_BOOT_FILE}
+		fastboot reboot
+		adb wait-for-device
+	else
+		echo "AOSP boot image doesn't exist (${AOSP_BOOT_FILE})"
+		exit 1
+	fi
 
 	echo "******************************"
-	echo "* 3. Do Root *"
-	adb reboot bootloader
-	echo "Enter ${ROOT_FOLDER}"
-	cd ${ROOT_FOLDER}
-	sh root-linux.sh
-	cd -
-	adb wait-for-device
-	sleep 35
-	adb wait-for-device
+	echo "* 3. Root the device *"
+	if [ -e ${ROOT_IMAGE} ]; then
+		adb reboot bootloader
+		echo "Root from ${ROOT_IMAGE}"
+		fastboot oem unlock 1>/dev/null 2>/dev/null
+		fastboot oem unlock 1>/dev/null 2>/dev/null
+		fastboot flashing unlock 1>/dev/null 2>/dev/null
+		fastboot flashing unlock 1>/dev/null 2>/dev/null
+		fastboot boot ${ROOT_IMAGE}
+		adb wait-for-device
+		sleep 35
+		adb wait-for-device
+	else
+		echo "Root image doesn't exist (${ROOT_IMAGE})"
+		exit 1
+	fi
 
 	echo "******************************"
 	echo "* 4. Print kernel message *"
