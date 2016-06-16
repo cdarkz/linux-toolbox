@@ -6,14 +6,13 @@
 #  Nexus 6P = angler
 #  Nexus 9 = flounder
 #  Nexus 5 = hammerhead
-DEVICE_NAME=flounder
 if [ -n $1 ]; then
 	DEVICE_NAME=$1
 fi
 
 AOSP_DIR=/mnt/SATA_HDD/android/aosp_marshmallow
 AOSP_BOOT_FILE=${AOSP_DIR}/out/target/product/${DEVICE_NAME}/boot.img
-case $DEVICE_NAME in
+case ${DEVICE_NAME} in
     "bullhead")
 	ROOT_IMAGE=/home/cdarkz/work_space/android/root_recovery/CF-Auto-Root-bullhead-bullhead-nexus5x/image/CF-Auto-Root-bullhead-bullhead-nexus5x.img
 	;;
@@ -62,8 +61,6 @@ if [ -d ${AOSP_DIR} ]; then
 		adb reboot bootloader
 		echo fastboot flash boot ${AOSP_BOOT_FILE}
 		fastboot flash boot ${AOSP_BOOT_FILE}
-		fastboot reboot
-		adb wait-for-device
 	else
 		echo "AOSP boot image doesn't exist (${AOSP_BOOT_FILE})"
 		exit 1
@@ -72,7 +69,6 @@ if [ -d ${AOSP_DIR} ]; then
 	echo "******************************"
 	echo "* 3. Root the device *"
 	if [ -e ${ROOT_IMAGE} ]; then
-		adb reboot bootloader
 		echo "Root from ${ROOT_IMAGE}"
 		fastboot oem unlock 1>/dev/null 2>/dev/null
 		fastboot oem unlock 1>/dev/null 2>/dev/null
@@ -80,8 +76,7 @@ if [ -d ${AOSP_DIR} ]; then
 		fastboot flashing unlock 1>/dev/null 2>/dev/null
 		fastboot boot ${ROOT_IMAGE}
 		adb wait-for-device
-		sleep 35
-		adb wait-for-device
+		sleep 30
 	else
 		echo "Root image doesn't exist (${ROOT_IMAGE})"
 		exit 1
@@ -89,9 +84,9 @@ if [ -d ${AOSP_DIR} ]; then
 
 	echo "******************************"
 	echo "* 4. Print kernel message *"
-	adb root
 	adb wait-for-device
-	adb shell cat /proc/kmsg
+	sleep 10
+	./infinite_adb_cat_kmsg.sh
 else
 	echo "${AOSP_DIR} don't exist!!"
 fi

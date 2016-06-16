@@ -2,6 +2,7 @@
 adb wait-for-device
 adb root
 adb wait-for-device
+sleep 5
 
 while [ 1 ]
 do
