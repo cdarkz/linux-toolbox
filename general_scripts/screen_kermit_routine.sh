@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# re-connect kermit
 user=`whoami`
 echo "screen for $user"
 for screenfull in "/var/run/screen/S-$user"/*;
@@ -18,3 +19,11 @@ done
 sleep 3
 screen -d -m kermit -y ~/kermit_log/kermrc_usb
 screen -d -m kermit
+
+# archive kermit logs
+archive_mon=$(date --date="-12 month" +%Y%m)
+
+cd ~/kermit_log
+compress_list=`/bin/ls ./${archive_mon}*.txt`
+/bin/tar jcvf ${archive_mon}xx.tar.bz2 ${archive_mon}*.txt
+/bin/rm ${archive_mon}*.txt
