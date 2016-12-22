@@ -23,7 +23,7 @@ screen -d -m kermit
 # archive kermit logs
 archive_mon=$(date --date="-12 month" +%Y%m)
 
-cd ~/kermit_log
-compress_list=`/bin/ls ./${archive_mon}*.txt`
-/bin/tar jcvf ${archive_mon}xx.tar.bz2 ${archive_mon}*.txt
-/bin/rm ${archive_mon}*.txt
+if [[ ! -z `/bin/ls ~/kermit_log/${archive_mon}*.txt 2>/dev/null` ]]; then
+	cd ~/kermit_log
+	/bin/tar jcvf ${archive_mon}xx.tar.bz2 ${archive_mon}*.txt && /bin/rm -f ${archive_mon}*.txt
+fi
