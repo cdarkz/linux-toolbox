@@ -16,6 +16,9 @@ do
 	fi
 done
 
+# remove zero size file
+find ~/kermit_log -size 0 | xargs rm
+
 sleep 3
 screen -d -m kermit -y ~/kermit_log/kermrc_usb
 screen -d -m kermit
