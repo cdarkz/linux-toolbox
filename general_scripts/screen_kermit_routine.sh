@@ -20,8 +20,8 @@ done
 find ~/kermit_log -size 0 | xargs rm
 
 sleep 3
-screen -d -m kermit -y ~/kermit_log/kermrc_usb
-screen -d -m kermit
+screen -d -m -S ttyUSB kermit -y ~/kermit_log/kermrc_usb
+screen -d -m -S ttyS kermit
 
 # archive kermit logs
 archive_mon=$(date --date="-12 month" +%Y%m)
